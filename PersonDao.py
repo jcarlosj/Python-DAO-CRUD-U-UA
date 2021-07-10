@@ -41,16 +41,31 @@ class PersonDao:
 
                 return cursor .rowcount                                                 #   Retorna numero de registros insertados
 
+    @classmethod
+    def update( cls, person ) :
+
+        with Connection .get_connection() :
+            with Connection .get_cursor() as cursor :
+
+                values = ( person .first_name, person .last_name, person .email, person .id )   #   Creamos una tupla de los campos que vamos a insertar
+                cursor .execute( cls ._UPDATE, values )
+                log .debug( f'Actualizo: { person }' )                                  #   Debe estar activado en nivel debug para que este mensaje se visualice
+
+                return cursor .rowcount                                                 #   Retorna numero de registros modificados
 
 # ! Realizamos las respectivas pruebas a la clase
 if __name__ == '__main__' :
 
     # ? Insertar un nuevo registro
-    person_1 = Person( fname = 'German', lname = 'Jimenez', email = 'gjimenez@correo.co' )
-    inserted_records = PersonDao .insert( person_1 )
-    log .debug( f'Personas insertadas: { inserted_records }' )
+    # person_1 = Person( fname = 'German', lname = 'Jimenez', email = 'gjimenez@correo.co' )
+    # inserted_records = PersonDao .insert( person_1 )
+    # log .debug( f'Personas insertadas: { inserted_records }' )
 
     # ? Mostrar todos los registros
     people = PersonDao .select()
     for person in people :
         log .debug( person )
+
+    person_1 = Person( 3, 'Germán Darío', 'Jiménez Gutiérrez', 'gjimenez@correo.co' )
+    inserted_records = PersonDao .update( person_1 )
+    log .debug( f'Personas actualizadas: { inserted_records }' )
