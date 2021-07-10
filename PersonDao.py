@@ -53,6 +53,19 @@ class PersonDao:
 
                 return cursor .rowcount                                                 #   Retorna numero de registros modificados
 
+    @classmethod
+    def delete( cls, person ) :
+
+        with Connection .get_connection() :
+            with Connection .get_cursor() as cursor :
+
+                values = ( person .id, )                                                # Ponemos una coma (,) para que sea considerada como una tupla de un elemento
+                cursor .execute( cls ._DELETE, values )
+                log .debug( f'Elimino: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
+
+                return cursor .rowcount                                                 #   Retorna numero de registros modificados
+
+
 # ! Realizamos las respectivas pruebas a la clase
 if __name__ == '__main__' :
 
@@ -66,6 +79,12 @@ if __name__ == '__main__' :
     for person in people :
         log .debug( person )
 
-    person_1 = Person( 3, 'Germán Darío', 'Jiménez Gutiérrez', 'gjimenez@correo.co' )
-    inserted_records = PersonDao .update( person_1 )
-    log .debug( f'Personas actualizadas: { inserted_records }' )
+    # ? Actualizar un registro
+    # person_1 = Person( 3, 'Germán Darío', 'Jiménez Gutiérrez', 'gjimenez@correo.co' )
+    # updated_records = PersonDao .update( person_1 )
+    # log .debug( f'Personas actualizadas: { updated_records }' )
+
+    # ? Eliminar un registro
+    person_1 = Person( id = 3 )
+    deleted_records = PersonDao .delete( person_1 )
+    log .debug( f'Personas eliminadas: { deleted_records }' )
