@@ -29,8 +29,28 @@ class PersonDao:
 
             return people
 
+    @classmethod
+    def insert( cls, person ) :
+
+        with Connection .get_connection():
+            with Connection .get_cursor() as cursor :
+
+                values = ( person .first_name, person .last_name, person .email )       #   Creamos una tupla de los campos que vamos a insertar
+                cursor .execute( cls ._INSERT, values )
+                log .debug( f'Inserto: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
+
+                return cursor .rowcount                                                 #   Retorna numero de registros insertados
+
+
 # ! Realizamos las respectivas pruebas a la clase
 if __name__ == '__main__' :
+
+    # ? Insertar un nuevo registro
+    person_1 = Person( fname = 'German', lname = 'Jimenez', email = 'gjimenez@correo.co' )
+    inserted_records = PersonDao .insert( person_1 )
+    log .debug( f'Personas insertadas: { inserted_records }' )
+
+    # ? Mostrar todos los registros
     people = PersonDao .select()
     for person in people :
         log .debug( person )

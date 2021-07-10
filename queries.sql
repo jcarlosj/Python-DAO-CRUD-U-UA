@@ -1,5 +1,8 @@
 CREATE DATABASE py_test;
 
+DROP TABLE IF EXISTS people;
+TRUNCATE TABLE people;
+
 CREATE TABLE people(
   	id serial,
 	first_name varchar( 30 ),
@@ -12,3 +15,10 @@ INSERT INTO people( first_name, last_name, email ) VALUES ( 'Juan Carlos', 'Jim�
 INSERT INTO people( first_name, last_name, email ) VALUES ( 'Janeth Eva Sofía', 'Gutiérrez González', 'jgutierrez@correo.co' );
 
 SELECT * FROM people ORDER BY id;
+
+
+
+
+
+
+

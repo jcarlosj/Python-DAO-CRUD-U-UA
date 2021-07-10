@@ -23,8 +23,8 @@ class Connection :
 
     @classmethod
     def get_connection( cls ) :
-
-        if not cls .is_connected() :
+        # Verifica que no haya conexion con la BD o que la conexion existente este cerrada
+        if not cls .is_connected() or cls ._connection .closed:
 
             return cls. create_connection()
         else :
@@ -52,8 +52,8 @@ class Connection :
 
     @classmethod
     def get_cursor( cls ) :
-
-        if not cls .cursor_exists() :
+        # Verifica que no exista el cursor o que el cursor existente este cerrado
+        if not cls .cursor_exists() or cls ._cursor .closed :
 
             return cls .create_cursor()
         else :
