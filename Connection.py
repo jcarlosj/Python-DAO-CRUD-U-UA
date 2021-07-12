@@ -1,4 +1,5 @@
-import psycopg2 as db, sys
+import sys
+from psycopg2 import pool
 
 from logger_base import log
 
@@ -9,33 +10,21 @@ class Connection :
     _DB_USER = 'postgres'
     _DB_PASS = '8fi3Eo7l1'
     _DB_PORT = '5432'
-    _DB_HOST = 'localhost'     # 127.0.0.1
-    _connection = None
-    _cursor = None
+    _DB_HOST = 'localhost'      # 127.0.0.1
+    _MINIMUM = 1                #   Cantidad minima de conexiones
+    _MAXIMUM = 4                #   Cantidad maxima de conexiones (Las bases de datos tienen limites para crear pools de acuerdo a los recursos)
+    _pool    = None
 
     @classmethod
-    def is_connected( cls ) :
-        return cls ._connection != None
+    def pool_exists( cls ) :
+        return cls ._pool != None
 
     @classmethod
-    def cursor_exists( cls ) :
-        return cls ._cursor != None
-
-    @classmethod
-    def get_connection( cls ) :
-        # Verifica que no haya conexion con la BD o que la conexion existente este cerrada
-        if not cls .is_connected() or cls ._connection .closed:
-
-            return cls. create_connection()
-        else :
-
-            return cls. _connection
-
-    @classmethod
-    def create_connection( cls ) :
+    def create_pool( cls ) :
         try:
-            #   Crea la conexión a la base de datos
-            cls ._connection = db .connect(
+            cls ._pool = pool .SimpleConnectionPool(
+                cls ._MINIMUM,
+                cls ._MAXIMUM,
                 host = cls ._DB_HOST,
                 user = cls ._DB_USER,
                 password = cls ._DB_PASS,
@@ -43,36 +32,55 @@ class Connection :
                 database = cls ._DB_NAME
             )
 
-            log .debug( f'Conexión a la BD exitosa { cls ._connection }' )                  #   Log: Lanza mensaje al terminal y almacena en el archivo de log de la aplicacion
+            log .debug( f'Creacion exitosa del pool { cls ._pool }' )
 
-            return cls ._connection
+            return cls ._pool
         except Exception as e:
-            log .error( f'No se puede conectar a la BD: { e }' )                            #   Log: Lanza mensaje al terminal y almacena en el archivo de log de la aplicacion
-            sys .exit()                                                                     #   Damos por terminado nuestro programa en el sistema
+            log .error( f'Error al obtener el pool: { e }' )
+            sys .exit()
 
     @classmethod
-    def get_cursor( cls ) :
-        # Verifica que no exista el cursor o que el cursor existente este cerrado
-        if not cls .cursor_exists() or cls ._cursor .closed :
+    def get_pool( cls ) :
+        if not cls .pool_exists() :
 
-            return cls .create_cursor()
+            return cls .create_pool()
         else :
 
-            return cls ._cursor
+            return cls ._pool
 
     @classmethod
-    def create_cursor( cls ) :
-        try:
-            cls ._cursor = cls .get_connection() .cursor()                                  #   Obtiene la conexión a la base de datos y asigna el cursor
-            log .debug( f'Se abrió correctamente el objeto cursor: { cls ._cursor }' )      #   Log: Lanza mensaje al terminal y almacena en el archivo de log de la aplicacion
+    def get_pool_connection( cls ) :
+        connection = cls .get_pool() .getconn()         #   Obtenemos un objeto de conexion del pool
+        log .debug( f'Objeto de conexion obtenido del pool exitosamente { connection }' )
 
-            return cls ._cursor
-        except Exception as e:
-            log .error( f'No pudo crear el cursor: { e }' )                                 #   Log: Lanza mensaje al terminal y almacena en el archivo de log de la aplicacion
-            sys .exit()                                                                     #   Damos por terminado nuestro programa en el sistema
+        return connection
+
+    @classmethod
+    def release_connection( cls, connection ) :
+        cls .get_pool() .putconn( connection )          #   Libera un objeto de conexion y lo deja disponible en el pool de conexiones
+        log .debug( f'Libera o regresa el objeto de conexion al pool { connection }' )
+
+    @classmethod
+    def close_connection( cls ) :
+        cls .get_pool() .closeall()                     #   Cierra el pool de conexiones, es decir, cierra la conexion de todos los objetos de conexion del pool
+        log .debug( 'Cierra el pool de conexiones' )
 
 
 # ! Realizamos las respectivas pruebas a la clase
 if __name__ == '__main__' :
-    Connection .get_connection()
-    Connection .get_cursor()
+    #   Solo podremos crear el numero maximo de conexiones que hemos espeficificado, 
+    #   a no ser que dichos objetos se vayan liberando, en tal caso no se superara nunca
+    #   el numero maximo establecido de objetos de conexion que puede tener el pool
+    connection_1 = Connection .get_pool_connection()
+    Connection .release_connection( connection_1 )
+
+    connection_2 = Connection .get_pool_connection()
+
+    connection_3 = Connection .get_pool_connection()
+    Connection .release_connection( connection_3 )
+
+    connection_4 = Connection .get_pool_connection()
+    Connection .release_connection( connection_2 )
+    Connection .release_connection( connection_4 )
+
+    connection_5 = Connection .get_pool_connection()
