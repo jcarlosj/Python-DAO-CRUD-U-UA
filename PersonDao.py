@@ -1,6 +1,6 @@
 from logger_base import log
-from Connection import Connection
 from Person import Person
+from Cursor import Cursor
 
 # Definicion de la clase
 class PersonDao:
@@ -17,7 +17,7 @@ class PersonDao:
     @classmethod
     def select( cls ) :
 
-        with Connection .get_cursor() as cursor :
+        with Cursor() as cursor :
             people = []
 
             cursor .execute( cls ._SELECT )
@@ -32,38 +32,35 @@ class PersonDao:
     @classmethod
     def insert( cls, person ) :
 
-        with Connection .get_connection():
-            with Connection .get_cursor() as cursor :
+        with Cursor() as cursor :
 
-                values = ( person .first_name, person .last_name, person .email )       #   Creamos una tupla de los campos que vamos a insertar
-                cursor .execute( cls ._INSERT, values )
-                log .debug( f'Inserto: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
+            values = ( person .first_name, person .last_name, person .email )       #   Creamos una tupla de los campos que vamos a insertar
+            cursor .execute( cls ._INSERT, values )
+            log .debug( f'Inserto: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
 
-                return cursor .rowcount                                                 #   Retorna numero de registros insertados
+            return cursor .rowcount                                                 #   Retorna numero de registros insertados
 
     @classmethod
     def update( cls, person ) :
 
-        with Connection .get_connection() :
-            with Connection .get_cursor() as cursor :
+        with Cursor() as cursor :
 
-                values = ( person .first_name, person .last_name, person .email, person .id )   #   Creamos una tupla de los campos que vamos a insertar
-                cursor .execute( cls ._UPDATE, values )
-                log .debug( f'Actualizo: { person }' )                                  #   Debe estar activado en nivel debug para que este mensaje se visualice
+            values = ( person .first_name, person .last_name, person .email, person .id )   #   Creamos una tupla de los campos que vamos a insertar
+            cursor .execute( cls ._UPDATE, values )
+            log .debug( f'Actualizo: { person }' )                                  #   Debe estar activado en nivel debug para que este mensaje se visualice
 
-                return cursor .rowcount                                                 #   Retorna numero de registros modificados
+            return cursor .rowcount                                                 #   Retorna numero de registros modificados
 
     @classmethod
     def delete( cls, person ) :
 
-        with Connection .get_connection() :
-            with Connection .get_cursor() as cursor :
+        with Cursor() as cursor :
 
-                values = ( person .id, )                                                # Ponemos una coma (,) para que sea considerada como una tupla de un elemento
-                cursor .execute( cls ._DELETE, values )
-                log .debug( f'Elimino: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
+            values = ( person .id, )                                                # Ponemos una coma (,) para que sea considerada como una tupla de un elemento
+            cursor .execute( cls ._DELETE, values )
+            log .debug( f'Elimino: { person }' )                                    #   Debe estar activado en nivel debug para que este mensaje se visualice
 
-                return cursor .rowcount                                                 #   Retorna numero de registros modificados
+            return cursor .rowcount                                                 #   Retorna numero de registros modificados
 
 
 # ! Realizamos las respectivas pruebas a la clase
@@ -74,17 +71,17 @@ if __name__ == '__main__' :
     # inserted_records = PersonDao .insert( person_1 )
     # log .debug( f'Personas insertadas: { inserted_records }' )
 
-    # ? Mostrar todos los registros
-    people = PersonDao .select()
-    for person in people :
-        log .debug( person )
-
     # ? Actualizar un registro
     # person_1 = Person( 3, 'Germán Darío', 'Jiménez Gutiérrez', 'gjimenez@correo.co' )
     # updated_records = PersonDao .update( person_1 )
     # log .debug( f'Personas actualizadas: { updated_records }' )
 
     # ? Eliminar un registro
-    person_1 = Person( id = 3 )
-    deleted_records = PersonDao .delete( person_1 )
-    log .debug( f'Personas eliminadas: { deleted_records }' )
+    # person_1 = Person( id = 3 )
+    # deleted_records = PersonDao .delete( person_1 )
+    # log .debug( f'Personas eliminadas: { deleted_records }' )
+
+    # ? Mostrar todos los registros
+    people = PersonDao .select()
+    for person in people :
+        log .debug( person )
