@@ -33,6 +33,7 @@ class Connection :
             )
 
             log .debug( f'Creacion exitosa del pool { cls ._pool }' )
+            # print( 'POOL', type( cls ._pool ) .__name__ )       # SimpleConnectionPool
 
             return cls ._pool
         except Exception as e:
